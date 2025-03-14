@@ -1,12 +1,15 @@
+// app/login/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { authService } from "../services/auth.service";
+import { useAuth } from "../context/AuthContext";
 
 const LoginPage = () => {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,11 +21,7 @@ const LoginPage = () => {
     setError("");
 
     try {
-      // ในอนาคตจะเชื่อมต่อกับ backend ที่นี่
-      console.log("Login attempt with:", { email, password });
-
-      // Mock successful login for now
-      localStorage.setItem("token", "mock-token");
+      await login(email, password);
       router.push("/");
     } catch (err) {
       setError(
@@ -42,8 +41,8 @@ const LoginPage = () => {
           href="/"
           className="text-2xl font-bold text-blue-600 flex items-center"
         >
-          <span className="text-6xl">🛒</span>
-          <span className="ml-2 text-5xl">Jaangkhon</span>
+          <span className="text-6xl">💼</span>
+          <span className="ml-2 pt-3 text-5xl">Jaangkhon</span>
         </Link>
       </div>
 

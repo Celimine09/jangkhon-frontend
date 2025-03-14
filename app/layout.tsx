@@ -1,5 +1,7 @@
+// app/layout.tsx
 import { Inter, Roboto_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "./context/AuthContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -12,7 +14,7 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata = {
-  title: "Your Marketplace",
+  title: "Jangkhon Marketplace",
   description: "ซื้อขายสินค้าออนไลน์",
 };
 
@@ -24,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={`${inter.variable} ${robotoMono.variable} antialiased`}>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

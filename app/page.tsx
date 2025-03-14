@@ -1,17 +1,21 @@
+// app/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { productService } from "./services/product.service";
+import { useAuth } from "./context/AuthContext";
+import Header from "./components/header";
 
 // Types
 interface Product {
-  id: string;
+  id: number;
   name: string;
   price: number;
   description: string;
-  imageUrl: string;
+  imageUrl?: string;
   category: string;
+  stock: number;
 }
 
 const HomePage = () => {
@@ -23,215 +27,40 @@ const HomePage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
+    async function fetchProducts() {
+      try {
+        const data = await productService.getProducts(
+          selectedCategory || undefined
+        );
+        setProducts(data);
 
-    // Mock fetching products
-    const mockProducts: Product[] = [
-      {
-        id: "1",
-        name: "สมาร์ทโฟนรุ่นใหม่",
-        price: 25000,
-        description:
-          "สมาร์ทโฟนรุ่นล่าสุดพร้อมกล้องความละเอียดสูงและแบตเตอรี่ที่ใช้งานได้ยาวนาน",
-        imageUrl: "/placeholder/300/200",
-        category: "อิเล็กทรอนิกส์",
-      },
-      {
-        id: "2",
-        name: "โน๊ตบุ๊คประสิทธิภาพสูง",
-        price: 45000,
-        description: "โน๊ตบุ๊คสำหรับทำงานและเล่นเกม พร้อมการ์ดจอรุ่นใหม่",
-        imageUrl: "/placeholder/300/200",
-        category: "อิเล็กทรอนิกส์",
-      },
-      {
-        id: "3",
-        name: "เสื้อยืดคอกลม",
-        price: 390,
-        description: "เสื้อยืดคอกลมผ้าฝ้าย 100% นุ่มสบาย",
-        imageUrl: "/placeholder/300/200",
-        category: "เสื้อผ้า",
-      },
-      {
-        id: "4",
-        name: "กางเกงยีนส์",
-        price: 1290,
-        description: "กางเกงยีนส์ทรงสลิม ผ้ายีนส์คุณภาพดี",
-        imageUrl: "/placeholder/300/200",
-        category: "เสื้อผ้า",
-      },
-      {
-        id: "5",
-        name: "ชุดตกแต่งบ้าน",
-        price: 2500,
-        description: "ชุดตกแต่งบ้านสไตล์มินิมอล",
-        imageUrl: "/placeholder/300/200",
-        category: "บ้านและสวน",
-      },
-      {
-        id: "6",
-        name: "หม้อหุงข้าวดิจิตอล",
-        price: 1590,
-        description: "หม้อหุงข้าวระบบดิจิตอล ความจุ 1.8 ลิตร",
-        imageUrl: "/placeholder/300/200",
-        category: "เครื่องใช้ในครัว",
-      },
-    ];
+        // Extract unique categories
+        const uniqueCategories = Array.from(
+          new Set(data.map((product) => product.category))
+        );
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    const uniqueCategories = Array.from(
-      new Set(mockProducts.map((product) => product.category))
-    );
-
-    setProducts(mockProducts);
-    setCategories(uniqueCategories);
-    setLoading(false);
-
-    // ในอนาคตจะเชื่อมต่อกับ backend
-  }, []);
+    fetchProducts();
+  }, [selectedCategory]);
 
   const filteredProducts = products.filter((product) => {
-    const matchesCategory = selectedCategory
-      ? product.category === selectedCategory
-      : true;
     const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesCategory && matchesSearch;
+    return matchesSearch;
   });
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <Link
-                href="/"
-                className="text-2xl font-bold text-blue-600 flex items-center"
-              >
-                <span className="text-4xl">🛒</span>
-                <span className="ml-2 text-4xl">Jaangkhon</span>
-              </Link>
-            </div>
-
-            <div className="w-full max-w-xl px-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  className="w-full h-10 pl-10 pr-4 py-1 text-base border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  placeholder="ค้นหาสินค้า..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <div className="absolute left-4 top-3">
-                  <svg
-                    className="h-4 w-4 text-gray-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              {isLoggedIn ? (
-                <div className="flex items-center space-x-4">
-                  <Link
-                    href="/cart"
-                    className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors"
-                  >
-                    <svg
-                      className="h-6 w-6"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-blue-600 rounded-full">
-                      0
-                    </span>
-                  </Link>
-                  <div className="relative group">
-                    <button className="p-2 text-gray-700 hover:text-blue-600 transition-colors flex items-center space-x-1">
-                      <svg
-                        className="h-6 w-6"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      <span className="hidden sm:inline-block">
-                        บัญชีของฉัน
-                      </span>
-                    </button>
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-20 hidden group-hover:block">
-                      <div className="py-2">
-                        <Link
-                          href="/profile"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          ข้อมูลส่วนตัว
-                        </Link>
-                        <Link
-                          href="/orders"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          ประวัติการสั่งซื้อ
-                        </Link>
-                        <button
-                          onClick={() => {
-                            localStorage.removeItem("token");
-                            setIsLoggedIn(false);
-                          }}
-                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                        >
-                          ออกจากระบบ
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex space-x-2 sm:space-x-4">
-                  <Link
-                    href="/login"
-                    className="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                  >
-                    Register
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main content */}
       <main className="flex-grow">

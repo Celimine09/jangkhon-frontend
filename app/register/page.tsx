@@ -1,16 +1,20 @@
+// app/register/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { authService } from "../services/auth.service";
 
 const RegisterPage = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    firstName: "",
+    lastName: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,6 +32,8 @@ const RegisterPage = () => {
     setLoading(true);
     setError("");
 
+    console.log("Form data being submitted:", formData);
+
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
       setError("Password Not Match!");
@@ -41,18 +47,37 @@ const RegisterPage = () => {
       return;
     }
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+    if (!passwordRegex.test(formData.password)) {
+      setError(
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
-      // ในอนาคตจะเชื่อมต่อกับ backend ที่นี่
-      console.log("Registration data:", {
-        name: formData.name,
+      await authService.register({
+        username: formData.username,
         email: formData.email,
-        password: "***********",
+        password: formData.password,
+        firstName: formData.firstName || "",
+        lastName: formData.lastName || "",
       });
 
       // Redirect to login page after successful registration
       router.push("/login");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Register Failed!");
+      console.error("Registration error:", err); // เพิ่มบรรทัดนี้
+
+      // ปรับปรุงการแสดงข้อความผิดพลาด
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (typeof err === "object" && err !== null) {
+        setError(JSON.stringify(err));
+      } else {
+        setError("Register Failed! Please try again later.");
+      }
     } finally {
       setLoading(false);
     }
@@ -65,8 +90,8 @@ const RegisterPage = () => {
           href="/"
           className="text-2xl font-bold text-blue-600 flex items-center"
         >
-          <span className="text-6xl">🛒</span>
-          <span className="ml-2 text-5xl">Jaangkhon</span>
+          <span className="text-6xl">💼</span>
+          <span className="ml-2 pt-3 text-5xl">Jaangkhon</span>
         </Link>
       </div>
 
@@ -109,22 +134,62 @@ const RegisterPage = () => {
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label
-                htmlFor="name"
+                htmlFor="username"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
                 Username
               </label>
               <input
-                id="name"
-                name="name"
+                id="username"
+                name="username"
                 type="text"
-                autoComplete="name"
+                autoComplete="username"
                 required
-                value={formData.name}
+                value={formData.username}
                 onChange={handleChange}
                 className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 placeholder="Username"
               />
+            </div>
+
+            {/* เพิ่มเข้าไปในฟอร์ม */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  First Name (Optional)
+                </label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  autoComplete="given-name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  placeholder="First name"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Last Name (Optional)
+                </label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autoComplete="family-name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  placeholder="Last name"
+                />
+              </div>
             </div>
 
             <div>
@@ -166,7 +231,8 @@ const RegisterPage = () => {
                 placeholder="••••••••"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Password need to be at least 8 letters
+                Password must contain at least one uppercase letter, one
+                lowercase letter, and one number
               </p>
             </div>
 
