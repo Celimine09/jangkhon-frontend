@@ -113,8 +113,8 @@ const HomePage = () => {
                 href="/"
                 className="text-2xl font-bold text-blue-600 flex items-center"
               >
-                <span className="text-3xl">🛒</span>
-                <span className="ml-2">Your Marketplace</span>
+                <span className="text-4xl">🛒</span>
+                <span className="ml-2 text-4xl">Jaangkhon</span>
               </Link>
             </div>
 
@@ -497,7 +497,7 @@ const HomePage = () => {
           </div>
           <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
             <p>
-              &copy; {new Date().getFullYear()} Jangkhon. All rights reserved.
+              &copy; {new Date().getFullYear()} Jaangkhon. All rights reserved.
             </p>
           </div>
         </div>

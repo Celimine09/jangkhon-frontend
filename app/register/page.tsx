@@ -66,7 +66,7 @@ const RegisterPage = () => {
           className="text-2xl font-bold text-blue-600 flex items-center"
         >
           <span className="text-6xl">🛒</span>
-          <span className="ml-2 text-5xl">Jangkhon</span>
+          <span className="ml-2 text-5xl">Jaangkhon</span>
         </Link>
       </div>
 
@@ -253,7 +253,7 @@ const RegisterPage = () => {
       </div>
 
       <div className="mt-8 text-center text-xs text-gray-500">
-        &copy; {new Date().getFullYear()} Jangkhon. All rights reserved.
+        &copy; {new Date().getFullYear()} Jaangkhon. All rights reserved.
       </div>
     </div>
   );
