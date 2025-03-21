@@ -1,4 +1,7 @@
 # Jaangkhon Marketplace - Frontend
+
+## Backend: https://github.com/Celimine09/jaangkhon-backend.git
+
 ## Overview
 Jaangkhon Marketplace เป็นแพลตฟอร์มซื้อขายสินค้าออนไลน์ที่สร้างด้วย Next.js และ TypeScript พร้อมด้วย Tailwind CSS สำหรับการจัดการส่วนของ UI
 
